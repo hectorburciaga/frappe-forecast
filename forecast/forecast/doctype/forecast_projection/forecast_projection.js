@@ -11,7 +11,6 @@ frappe.ui.form.on('Forecast Projection', {
         }, __("Get Items From"));
         update_totals(frm, cdt, cdn);
         update_net_total(frm);
-        //get_total_invoiced();
     },
 
     company(frm) {
@@ -134,45 +133,6 @@ function update_totals(frm, cdt, cdn) {
     frm.set_value("in_subtotal", total);
     refresh_field("in_subtotal");
 }
-
-/* function get_total_invoiced() {
-    frappe.db.get_list('Sales Invoice Item', filters={sales_invoice: 'SAL-ORD-2025-00001'}, fields=['amount'])
-    .then(r => {
-    let values = r.message;
-    console.log(values)
-    })
-} */
-
-/* function get_total_invoiced() {
-    frappe.db.get_value("Sales Invoice Item", {sales_invoice: 'SAL-ORD-2025-00001'}, "amount", function(value){
-        frm.doc.amount = value.amount;
-        console.log(value.amount);
-    });
-} */
-
-/* function get_total_invoiced() {
-    frappe.db.get_list('Sales Invoice Item', {
-        filters: {
-            sales_order: cur_frm.sales_order
-        },
-        fields: ['name', 'amount'],
-        limit: 500,
-    }).then(res => {
-        console.log(res)
-    }); */
-
-/* 
-}); */
-
-
-/*     var sum = 0;
-    var so = cur_frm.sales_order;
-    doc.sales_invoice_item.forEach(function(sales_invoice_item){
-        sum += sales_invoice_item === so ? item.amount : 0;
-    });
-    cur_frm.set_value("invoiced", sum);
-    refresh_field("invoiced"); */
-/// PURCHASE ORDERS *****
 
 frappe.ui.form.on('Contractor Item', {
     item_code: function (frm, cdt, cdn) {
