@@ -76,6 +76,7 @@ function show_sord_dialog(frm) {
             },
             add_filters_group: 1,
             date_field: "transaction_date",
+            columns: ["name", "customer", "transaction_date", "project", "net_total", "per_billed", "status"],
             get_query() {
                 return {
                     filters: {
@@ -181,11 +182,12 @@ function show_pord_dialog(frm) {
                 supplier: null,
                 company: frm.doc.company,
                 project: frm.doc.project,
-                net_total: null,
+                status: null,
                 per_billed: ["<=", "99.99999"],
             },
             add_filters_group: 1,
             date_field: "transaction_date",
+            columns: ["name", "supplier", "transaction_date", "project", "net_total", "per_billed", "status"],
             get_query() {
                 return {
                     filters: {
