@@ -66,7 +66,7 @@ function show_sord_dialog(frm) {
     new frappe.ui.form.MultiSelectDialog(
         {
             doctype: "Sales Order",
-            target: this.cur_frm,
+            target: cur_frm,
             setters: {
                 customer: null,
                 company: frm.doc.company,
@@ -175,7 +175,7 @@ function show_pord_dialog(frm) {
     new frappe.ui.form.MultiSelectDialog(
         {
             doctype: "Purchase Order",
-            target: this.cur_frm,
+            target: cur_frm,
             setters: {
                 supplier: null,
                 company: frm.doc.company,
