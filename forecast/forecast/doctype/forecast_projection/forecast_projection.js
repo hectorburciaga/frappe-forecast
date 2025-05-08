@@ -9,9 +9,9 @@ frappe.ui.form.on('Forecast Projection', {
         frm.add_custom_button(__("Purchase Order"), function () {
             show_pord_dialog(frm);
         }, __("Get Items From"));
-/*         update_in_totals(frm, cdt, cdn);
-        update_po_totals(frm, cdt, cdn);
-        update_net_total(frm); */
+        /*         update_in_totals(frm, cdt, cdn);
+                update_po_totals(frm, cdt, cdn);
+                update_net_total(frm); */
     },
     before_save: function (frm, cdt, cdn) {
         update_in_totals(frm, cdt, cdn);
@@ -230,10 +230,14 @@ function get_items_from_sord(sales_order) {
 function update_in_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
-    frm.doc.forecast_items.forEach(function (child) { total += child.amount; });
-    frm.set_value("in_subtotal", total);
-    refresh_field("in_subtotal");
-    in_net_total(frm);
+    if (frm.doc.forecast_items.length === 0) {
+        console.log('Child table has no content');
+    } else {
+        frm.doc.forecast_items.forEach(function (child) { total += child.amount; });
+        frm.set_value("in_subtotal", total);
+        refresh_field("in_subtotal");
+        in_net_total(frm);
+    }
 }
 
 //Purchase Order Dialog
@@ -306,10 +310,14 @@ function get_items_from_pord(purchase_order) {
 function update_po_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
-    frm.doc.subcontracts.forEach(function (child) { total += child.amount; });
-    frm.set_value("out_subtotal", total);
-    refresh_field("out_subtotal");
-    out_net_total(frm);
+    if (frm.doc.subcontracts.length === 0) {
+        console.log('Child table has no content');
+    } else {
+        frm.doc.subcontracts.forEach(function (child) { total += child.amount; });
+        frm.set_value("out_subtotal", total);
+        refresh_field("out_subtotal");
+        out_net_total(frm);
+    }
 }
 
 //Income Deduction Dialog
@@ -409,10 +417,14 @@ function get_in_deduct(values) {
 function update_in_deduct_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
-    frm.doc.in_deductions.forEach(function (child) { total += child.total_deduction; });
-    frm.set_value("total_in_deductions", total);
-    refresh_field("total_in_deductions");
-    in_net_total(frm);
+    if (frm.doc.in_deductions.length === 0) {
+        console.log('Child table has no content');
+    } else {
+        frm.doc.in_deductions.forEach(function (child) { total += child.total_deduction; });
+        frm.set_value("total_in_deductions", total);
+        refresh_field("total_in_deductions");
+        in_net_total(frm);
+    }
 }
 
 function in_net_total(frm) {
@@ -518,10 +530,14 @@ function get_out_deduct(values) {
 function update_out_deduct_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
-    frm.doc.out_deductions.forEach(function (child) { total += child.total_deduction; });
-    frm.set_value("total_out_deductions", total);
-    refresh_field("total_out_deductions");
-    out_net_total(frm);
+    if (frm.doc.out_deductions.length === 0) {
+        console.log('Child table has no content');
+    } else {
+        frm.doc.out_deductions.forEach(function (child) { total += child.total_deduction; });
+        frm.set_value("total_out_deductions", total);
+        refresh_field("total_out_deductions");
+        out_net_total(frm);
+    }
 }
 
 function out_net_total(frm) {
@@ -539,10 +555,14 @@ function update_net_total(frm) {
 
 //Update Deductions with Forecast Projection Number "After Save"
 function update_deduction_number(frm) {
-    frm.doc.in_deductions.forEach(function (child) {
-        frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
-    });
-    frm.doc.out_deductions.forEach(function (child) {
-        frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
-    });
+    if (frm.doc.in_deductions.length === 0) {
+        console.log('Child table has no content');
+    } else {
+        frm.doc.in_deductions.forEach(function (child) {
+            frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
+        });
+        frm.doc.out_deductions.forEach(function (child) {
+            frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
+        });
+    }
 }
