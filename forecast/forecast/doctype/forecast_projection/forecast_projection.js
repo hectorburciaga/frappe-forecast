@@ -9,9 +9,9 @@ frappe.ui.form.on('Forecast Projection', {
         frm.add_custom_button(__("Purchase Order"), function () {
             show_pord_dialog(frm);
         }, __("Get Items From"));
-        update_in_totals(frm, cdt, cdn);
+/*         update_in_totals(frm, cdt, cdn);
         update_po_totals(frm, cdt, cdn);
-        update_net_total(frm);
+        update_net_total(frm); */
     },
     before_save: function (frm, cdt, cdn) {
         update_in_totals(frm, cdt, cdn);
