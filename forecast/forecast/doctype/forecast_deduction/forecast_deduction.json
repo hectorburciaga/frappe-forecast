@@ -1,0 +1,92 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2025-05-04 21:55:05.846977",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "section_break_hpjd",
+  "deduction_type",
+  "calc_type",
+  "deduction_base",
+  "per_deduction",
+  "total_deduction",
+  "forecast_projection",
+  "applies_to"
+ ],
+ "fields": [
+  {
+   "fieldname": "section_break_hpjd",
+   "fieldtype": "Section Break"
+  },
+  {
+   "allow_in_quick_entry": 1,
+   "fieldname": "deduction_type",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Deduction Type",
+   "options": "Forecast Deduction Type",
+   "reqd": 1
+  },
+  {
+   "fieldname": "calc_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Calculation Type",
+   "mandatory_depends_on": "eval:doc.deduction_type !== null",
+   "options": "Percentage\nFixed Amount"
+  },
+  {
+   "fieldname": "deduction_base",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Deduction Base",
+   "precision": "2"
+  },
+  {
+   "depends_on": "eval:doc.calc_type == 'Percentage'",
+   "fieldname": "per_deduction",
+   "fieldtype": "Percent",
+   "label": "Percent Deduction",
+   "precision": "4"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_deduction",
+   "fieldtype": "Currency",
+   "in_list_view": 1,
+   "label": "Total Deduction",
+   "precision": "2"
+  },
+  {
+   "fieldname": "forecast_projection",
+   "fieldtype": "Link",
+   "label": "Forecast_Projection",
+   "options": "Forecast Projection",
+   "read_only": 1,
+   "search_index": 1
+  },
+  {
+   "fieldname": "applies_to",
+   "fieldtype": "Select",
+   "label": "Applies To",
+   "options": "Income\nExpense",
+   "read_only": 1
+  }
+ ],
+ "grid_page_length": 50,
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2025-05-07 18:58:00.045021",
+ "modified_by": "Administrator",
+ "module": "Forecast",
+ "name": "Forecast Deduction",
+ "owner": "Administrator",
+ "permissions": [],
+ "row_format": "Dynamic",
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": []
+}

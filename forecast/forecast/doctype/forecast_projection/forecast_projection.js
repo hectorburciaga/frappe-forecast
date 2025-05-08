@@ -9,8 +9,17 @@ frappe.ui.form.on('Forecast Projection', {
         frm.add_custom_button(__("Purchase Order"), function () {
             show_pord_dialog(frm);
         }, __("Get Items From"));
-        update_totals(frm, cdt, cdn);
+        update_in_totals(frm, cdt, cdn);
+        update_po_totals(frm, cdt, cdn);
         update_net_total(frm);
+    },
+    before_save: function (frm, cdt, cdn) {
+        update_in_totals(frm, cdt, cdn);
+        update_po_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+    after_save: function (frm, cdt, cdn) {
+        update_deduction_number(frm);
     },
 
     company(frm) {
@@ -22,6 +31,18 @@ frappe.ui.form.on('Forecast Projection', {
                 }
             };
         });
+    },
+
+    subcontracts: function (frm, cdt, cdn) {
+        update_po_totals(frm, cdt, cdn);
+    },
+
+    in_deduct(frm) {
+        in_deduct_dialog(frm);
+    },
+
+    out_deduct(frm) {
+        out_deduct_dialog(frm);
     }
 });
 
@@ -37,7 +58,7 @@ frappe.ui.form.on('Forecast Item', {
             refresh_field("amount", cdn);
         }
 
-        update_totals(frm, cdt, cdn);
+        update_in_totals(frm, cdt, cdn);
         update_net_total(frm);
     },
 
@@ -57,11 +78,88 @@ frappe.ui.form.on('Forecast Item', {
             refresh_field("amount", cdn);
         }
 
-        update_totals(frm, cdt, cdn);
+        update_in_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+
+    forecast_items_add(frm, cdt, cdn) {
+        update_in_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+
+    forecast_items_remove(frm, cdt, cdn) {
+        frappe.msgprint("Sales Order Removed");
+        update_in_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    }
+
+});
+
+frappe.ui.form.on('Forecast Deduction', {
+    in_deductions_add(frm, cdt, cdn) {
+        update_in_deduct_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+    in_deductions_remove(frm, cdt, cdn) {
+        frappe.msgprint("Income Deduction Removed");
+        update_in_deduct_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+    out_deductions_add(frm, cdt, cdn) {
+        update_out_deduct_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+    out_deductions_remove(frm, cdt, cdn) {
+        frappe.msgprint("Income Deduction Removed");
+        update_out_deduct_totals(frm, cdt, cdn);
         update_net_total(frm);
     }
 });
 
+frappe.ui.form.on('Contractor Item', {
+    item_code: function (frm, cdt, cdn) {
+        var child = locals[cdt][cdn];
+        var qty = child.qty;
+        var rate = child.rate;
+        var amount = qty * rate;
+
+        if (!child.amount) {
+            child.amount = amount;
+            refresh_field("amount", cdn);
+        }
+
+        update_po_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+
+    qty: function (frm, cdt, cdn) {
+        var child = locals[cdt][cdn];
+        var qty = child.qty;
+        var rate = child.rate;
+        var amount = qty * rate;
+
+        if (!child.amount) {
+            child.amount = amount;
+            refresh_field("amount", cdn);
+        }
+
+        else {
+            child.amount = amount;
+            refresh_field("amount", cdn);
+        }
+
+        update_po_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    },
+
+    subcontracts_remove(frm, cdt, cdn) {
+        frappe.msgprint("Purchase Order Removed");
+        update_po_totals(frm, cdt, cdn);
+        update_net_total(frm);
+    }
+});
+
+// Sales Order Dialog
 function show_sord_dialog(frm) {
     new frappe.ui.form.MultiSelectDialog(
         {
@@ -123,56 +221,22 @@ function get_items_from_sord(sales_order) {
             cur_frm.refresh_field('forecast_items');
             cur_frm.set_value('customer', sinv.customer);
             cur_frm.set_value('sales_order', sinv.name);
-        }
+        },
+
     });
 
 }
 
-function update_totals(frm, cdt, cdn) {
+function update_in_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
     frm.doc.forecast_items.forEach(function (child) { total += child.amount; });
     frm.set_value("in_subtotal", total);
     refresh_field("in_subtotal");
+    in_net_total(frm);
 }
 
-frappe.ui.form.on('Contractor Item', {
-    item_code: function (frm, cdt, cdn) {
-        var child = locals[cdt][cdn];
-        var qty = child.qty;
-        var rate = child.rate;
-        var amount = qty * rate;
-
-        if (!child.amount) {
-            child.amount = amount;
-            refresh_field("amount", cdn);
-        }
-
-        update_po_totals(frm, cdt, cdn);
-        update_net_total(frm);
-    },
-
-    qty: function (frm, cdt, cdn) {
-        var child = locals[cdt][cdn];
-        var qty = child.qty;
-        var rate = child.rate;
-        var amount = qty * rate;
-
-        if (!child.amount) {
-            child.amount = amount;
-            refresh_field("amount", cdn);
-        }
-
-        else {
-            child.amount = amount;
-            refresh_field("amount", cdn);
-        }
-
-        update_po_totals(frm, cdt, cdn);
-        update_net_total(frm);
-    }
-});
-
+//Purchase Order Dialog
 function show_pord_dialog(frm) {
     new frappe.ui.form.MultiSelectDialog(
         {
@@ -242,19 +306,243 @@ function get_items_from_pord(purchase_order) {
 function update_po_totals(frm, cdt, cdn) {
     var child = locals[cdt][cdn];
     var total = 0;
-    frm.doc.subcontracts.forEach(function(child) { total += child.amount; });
+    frm.doc.subcontracts.forEach(function (child) { total += child.amount; });
     frm.set_value("out_subtotal", total);
     refresh_field("out_subtotal");
+    out_net_total(frm);
 }
 
+//Income Deduction Dialog
+function in_deduct_dialog(frm, cdt, cdn) {
+
+    var base = frm.doc.in_subtotal;
+    let d = new frappe.ui.Dialog({
+        title: 'Income Deductions',
+        fields: [
+            {
+                label: 'Deduction Type',
+                fieldname: 'deduction_type',
+                fieldtype: 'Link',
+                options: 'Forecast Deduction Type',
+                reqd: 1,
+                onchange: function () {
+                    var subtotal = base;
+                    d.set_value('deduction_base', subtotal);
+                }
+            },
+            {
+                label: 'Calculation Type',
+                fieldname: 'calc_type',
+                fieldtype: 'Select',
+                options: ['Percentage', 'Fixed Amount'],
+                reqd: 1,
+            },
+            {
+                label: 'Deduction Base',
+                fieldname: 'deduction_base',
+                fieldtype: 'Currency',
+                reqd: 1,
+                read_only: true,
+            },
+            {
+                label: 'Deduction (% or Amount)',
+                fieldname: 'deduction_amount',
+                fieldtype: 'Float',
+                reqd: 1,
+                onchange: function () {
+                    var amount = d.get_value('deduction_amount');
+                    var type = d.get_value('calc_type');
+                    if (type == 'Fixed Amount') {
+                        var subtotal = base;
+                        var percent = (amount / subtotal) * 100;
+                        d.set_value('per_deduction', percent);
+                        d.set_value('total_deduction', amount);
+                    }
+                    else if (type == 'Percentage') {
+                        var subtotal = base;
+                        var percent = amount;
+                        var total = (percent / 100) * subtotal;
+                        d.set_value('total_deduction', total);
+                        d.set_value('per_deduction', percent);
+                    }
+                }
+            },
+            {
+                label: 'Percentage',
+                fieldname: 'per_deduction',
+                fieldtype: 'Percent',
+                reqd: 1,
+                read_only: true,
+            },
+            {
+                label: 'Total Deduction',
+                fieldname: 'total_deduction',
+                fieldtype: 'Currency',
+                reqd: 1,
+                read_only: true,
+            }
+        ],
+        size: 'small', // small, large, extra-large 
+        primary_action_label: 'Submit',
+        primary_action(values) {
+            get_in_deduct(values);
+            update_in_deduct_totals(frm, cdt, cdn);
+            update_net_total(frm);
+            d.hide();
+        }
+    });
+    d.show();
+}
+
+function get_in_deduct(values) {
+    var child = cur_frm.add_child('in_deductions');
+    frappe.model.set_value(child.doctype, child.name, 'deduction_type', values.deduction_type);
+    frappe.model.set_value(child.doctype, child.name, 'calc_type', values.calc_type);
+    frappe.model.set_value(child.doctype, child.name, 'deduction_base', values.deduction_base);
+    frappe.model.set_value(child.doctype, child.name, 'per_deduction', values.per_deduction);
+    frappe.model.set_value(child.doctype, child.name, 'total_deduction', values.total_deduction);
+    //frappe.model.set_value(child.doctype, child.name, 'forecast_projection', cur_frm.doc.name);
+    frappe.model.set_value(child.doctype, child.name, 'applies_to', "Income");
+    cur_frm.refresh_field('in_deductions');
+}
+
+function update_in_deduct_totals(frm, cdt, cdn) {
+    var child = locals[cdt][cdn];
+    var total = 0;
+    frm.doc.in_deductions.forEach(function (child) { total += child.total_deduction; });
+    frm.set_value("total_in_deductions", total);
+    refresh_field("total_in_deductions");
+    in_net_total(frm);
+}
+
+function in_net_total(frm) {
+    var total = frm.doc.in_subtotal - frm.doc.total_in_deductions;
+    frm.set_value("in_net_total", total);
+    refresh_field("in_net_total");
+}
+
+//Expense Deduction Dialog
+function out_deduct_dialog(frm, cdt, cdn) {
+
+    var base = frm.doc.out_subtotal;
+    let d = new frappe.ui.Dialog({
+        title: 'Expense Deductions',
+        fields: [
+            {
+                label: 'Deduction Type',
+                fieldname: 'deduction_type',
+                fieldtype: 'Link',
+                options: 'Forecast Deduction Type',
+                reqd: 1,
+                onchange: function () {
+                    var subtotal = base;
+                    d.set_value('deduction_base', subtotal);
+                }
+            },
+            {
+                label: 'Calculation Type',
+                fieldname: 'calc_type',
+                fieldtype: 'Select',
+                options: ['Percentage', 'Fixed Amount'],
+                reqd: 1,
+            },
+            {
+                label: 'Deduction Base',
+                fieldname: 'deduction_base',
+                fieldtype: 'Currency',
+                reqd: 1,
+                read_only: true,
+            },
+            {
+                label: 'Deduction (% or Amount)',
+                fieldname: 'deduction_amount',
+                fieldtype: 'Float',
+                reqd: 1,
+                onchange: function () {
+                    var amount = d.get_value('deduction_amount');
+                    var type = d.get_value('calc_type');
+                    if (type == 'Fixed Amount') {
+                        var subtotal = base;
+                        var percent = (amount / subtotal) * 100;
+                        d.set_value('per_deduction', percent);
+                        d.set_value('total_deduction', amount);
+                    }
+                    else if (type == 'Percentage') {
+                        var subtotal = base;
+                        var percent = amount;
+                        var total = (percent / 100) * subtotal;
+                        d.set_value('total_deduction', total);
+                        d.set_value('per_deduction', percent);
+                    }
+                }
+            },
+            {
+                label: 'Percentage',
+                fieldname: 'per_deduction',
+                fieldtype: 'Percent',
+                reqd: 1,
+                read_only: true,
+            },
+            {
+                label: 'Total Deduction',
+                fieldname: 'total_deduction',
+                fieldtype: 'Currency',
+                reqd: 1,
+                read_only: true,
+            }
+        ],
+        size: 'small', // small, large, extra-large 
+        primary_action_label: 'Submit',
+        primary_action(values) {
+            get_out_deduct(values);
+            update_out_deduct_totals(frm, cdt, cdn);
+            update_net_total(frm);
+            d.hide();
+        }
+    });
+    d.show();
+}
+
+function get_out_deduct(values) {
+    var child = cur_frm.add_child('out_deductions');
+    frappe.model.set_value(child.doctype, child.name, 'deduction_type', values.deduction_type);
+    frappe.model.set_value(child.doctype, child.name, 'calc_type', values.calc_type);
+    frappe.model.set_value(child.doctype, child.name, 'deduction_base', values.deduction_base);
+    frappe.model.set_value(child.doctype, child.name, 'per_deduction', values.per_deduction);
+    frappe.model.set_value(child.doctype, child.name, 'total_deduction', values.total_deduction);
+    //frappe.model.set_value(child.doctype, child.name, 'forecast_projection', cur_frm.doc.name);
+    frappe.model.set_value(child.doctype, child.name, 'applies_to', "Expense");
+    cur_frm.refresh_field('out_deductions');
+}
+
+function update_out_deduct_totals(frm, cdt, cdn) {
+    var child = locals[cdt][cdn];
+    var total = 0;
+    frm.doc.out_deductions.forEach(function (child) { total += child.total_deduction; });
+    frm.set_value("total_out_deductions", total);
+    refresh_field("total_out_deductions");
+    out_net_total(frm);
+}
+
+function out_net_total(frm) {
+    var total = frm.doc.out_subtotal - frm.doc.total_out_deductions;
+    frm.set_value("out_net_total", total);
+    refresh_field("out_net_total");
+}
+
+//Updates Net Total
 function update_net_total(frm) {
-    var total = frm.doc.in_subtotal - frm.doc.out_subtotal;
+    var total = frm.doc.in_net_total - frm.doc.out_net_total;
     frm.set_value("net_total", total);
     refresh_field("net_total");
 }
 
-function update_net_total(frm) {
-    var total = frm.doc.in_subtotal - frm.doc.out_subtotal;
-    frm.set_value("net_total", total);
-    refresh_field("net_total");
+//Update Deductions with Forecast Projection Number "After Save"
+function update_deduction_number(frm) {
+    frm.doc.in_deductions.forEach(function (child) {
+        frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
+    });
+    frm.doc.out_deductions.forEach(function (child) {
+        frappe.model.set_value(child.doctype, child.name, 'forecast_projection', frm.doc.name);
+    });
 }

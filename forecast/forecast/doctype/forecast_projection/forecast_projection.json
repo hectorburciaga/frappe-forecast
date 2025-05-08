@@ -1,13 +1,16 @@
 {
  "actions": [],
  "allow_rename": 1,
- "autoname": "format:FC{YY}-{company}-{######}",
+ "autoname": "format:FC{YY}-{abbr}-{#####}",
  "creation": "2025-04-29 00:12:34.845755",
  "doctype": "DocType",
  "engine": "InnoDB",
  "field_order": [
+  "abbr",
   "status",
   "column_break_1vib",
+  "project_name",
+  "column_break_5rxo",
   "net_total",
   "section_break_ts9p",
   "company",
@@ -20,17 +23,30 @@
   "section_break_va8l",
   "income",
   "forecast_items",
-  "section_break_8wrl",
   "in_subtotal",
+  "section_break_8wrl",
+  "in_deduct",
+  "in_deductions",
+  "section_break_qlx3",
+  "total_in_deductions",
   "column_break_rnvg",
+  "in_net_total",
+  "column_break_jdst",
   "sales_order",
   "section_break_z7tg",
   "expenses",
   "subcontracts",
-  "section_break_ng79",
   "out_subtotal",
+  "section_break_ng79",
+  "out_deduct",
+  "out_deductions",
+  "section_break_qxdo",
+  "total_out_deductions",
   "column_break_wxnp",
+  "out_net_total",
+  "column_break_r75q",
   "purchase_order",
+  "section_break_vhfn",
   "amended_from"
  ],
  "fields": [
@@ -46,6 +62,7 @@
    "fieldtype": "Column Break"
   },
   {
+   "default": "0",
    "fieldname": "net_total",
    "fieldtype": "Currency",
    "label": "Projected Net Total",
@@ -133,9 +150,10 @@
    "fieldtype": "Section Break"
   },
   {
+   "default": "0",
    "fieldname": "in_subtotal",
    "fieldtype": "Currency",
-   "label": "Projection Subtotal",
+   "label": "Income Subtotal",
    "precision": "2",
    "read_only": 1
   },
@@ -197,13 +215,112 @@
    "print_hide": 1,
    "read_only": 1,
    "search_index": 1
+  },
+  {
+   "fieldname": "in_deductions",
+   "fieldtype": "Table",
+   "label": "Income Deductions",
+   "options": "Forecast Deduction"
+  },
+  {
+   "fieldname": "out_deductions",
+   "fieldtype": "Table",
+   "label": "Expense Deductions",
+   "options": "Forecast Deduction"
+  },
+  {
+   "fieldname": "section_break_qlx3",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "section_break_qxdo",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fieldname": "project_name",
+   "fieldtype": "Data",
+   "in_filter": 1,
+   "in_list_view": 1,
+   "in_preview": 1,
+   "in_standard_filter": 1,
+   "label": "Project Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_5rxo",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "in_deduct",
+   "fieldtype": "Button",
+   "label": "Add Deductions"
+  },
+  {
+   "default": "0",
+   "fieldname": "in_net_total",
+   "fieldtype": "Currency",
+   "label": "Income Net Total",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_jdst",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_in_deductions",
+   "fieldtype": "Currency",
+   "label": "Total Deductions",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "out_deduct",
+   "fieldtype": "Button",
+   "label": "Add Deduction"
+  },
+  {
+   "default": "0",
+   "fieldname": "total_out_deductions",
+   "fieldtype": "Currency",
+   "label": "Total Deductions",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "default": "0",
+   "fieldname": "out_net_total",
+   "fieldtype": "Currency",
+   "label": "Expense Net Total",
+   "precision": "2",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_r75q",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "section_break_vhfn",
+   "fieldtype": "Section Break"
+  },
+  {
+   "fetch_from": "company.abbr",
+   "fetch_if_empty": 1,
+   "fieldname": "abbr",
+   "fieldtype": "Data",
+   "hidden": 1,
+   "is_virtual": 1,
+   "label": "Abbr",
+   "read_only": 1
   }
  ],
  "grid_page_length": 50,
  "icon": "graph",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-04-29 00:12:34.845755",
+ "modified": "2025-05-07 14:02:24.207285",
  "modified_by": "Administrator",
  "module": "Forecast",
  "name": "Forecast Projection",
@@ -246,6 +363,10 @@
   {
    "color": "Purple",
    "title": "Paid"
+  },
+  {
+   "color": "Red",
+   "title": "Rejected"
   },
   {
    "color": "Red",
