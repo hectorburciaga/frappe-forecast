@@ -140,6 +140,7 @@
    "label": "Income"
   },
   {
+   "default": "0",
    "fieldname": "forecast_items",
    "fieldtype": "Table",
    "label": "Forecast Items",
@@ -179,6 +180,7 @@
    "label": "Expenses"
   },
   {
+   "default": "0",
    "fieldname": "subcontracts",
    "fieldtype": "Table",
    "label": "Subcontracts",
@@ -217,12 +219,14 @@
    "search_index": 1
   },
   {
+   "default": "0",
    "fieldname": "in_deductions",
    "fieldtype": "Table",
    "label": "Income Deductions",
    "options": "Forecast Deduction"
   },
   {
+   "default": "0",
    "fieldname": "out_deductions",
    "fieldtype": "Table",
    "label": "Expense Deductions",
@@ -320,7 +324,7 @@
  "icon": "graph",
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-05-07 14:02:24.207285",
+ "modified": "2025-05-07 20:21:24.196580",
  "modified_by": "Administrator",
  "module": "Forecast",
  "name": "Forecast Projection",
